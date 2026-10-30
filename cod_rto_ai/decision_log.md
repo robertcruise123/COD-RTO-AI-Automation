@@ -1,0 +1,14 @@
+# Decision log
+
+- **Use a supervised model, not an LLM, for risk probability.** The task is tabular classification with historical outcomes. Logistic regression is interpretable, fast and less likely than a complex model to overfit this small sample. Alternative considered: tree boosting; deferred until more clean data is available.
+- **Normalize labels before training.** The CSV contains `RTO`, `Rto`, `RTO `, `DELIVERED`, and `delivered`; inconsistent casing/whitespace should not create separate classes.
+- **Exclude `IN_TRANSIT` from supervised labels.** It is not a final delivery/RTO outcome and should not be forced into either class.
+- **Use time-ordered holdout diagnostics.** Random splitting can make evaluation too optimistic when operational patterns drift. Still, one small holdout is not enough for launch approval.
+- **Use a conservative human-review default for very high risk.** Operations wants fewer RTOs, while Marketing is concerned about wasted acquisition cost and first-time buyer cancellation. Auto-cancel is off by default; an operator can explicitly enable it for a controlled test.
+- **Set initial action thresholds at 18%, 35%, and 55%.** These are transparent pilot defaults, not statistically optimized thresholds. They are editable in the sidebar and persisted to `config.json`.
+- **Use deterministic validation checks for obvious data quality issues.** Empty/very short addresses, placeholder names, invalid phone length and zero-value orders trigger confirmation. This avoids spending an LLM call on simple checks.
+- **Do not call an LLM in the offline demo.** An LLM may help interpret multilingual/Hinglish addresses or explain ambiguous free text, but should be a secondary signal with confidence thresholds and human review, not the sole cancellation decision. This build has no API key/provider requirement.
+- **Offer 3% prepaid discount capped at ₹30.** At ₹649 AOV, 3% is ₹19.47. Under the assignment's stated RTO rates, a fully successful COD-to-prepaid switch would reduce expected direct RTO cost by about `(28%-4%) × ₹169.40 = ₹40.66` per order before discount; subtracting ₹19.47 leaves about ₹21.19 expected benefit if the order would otherwise have had the average COD risk and the customer completes payment. Actual benefit depends on conversion and customer mix.
+- **Keep the WhatsApp flow as a simulator.** Real messaging requires approved templates, consent, provider credentials, opt-out and webhook handling. The demo does not pretend to send messages or verify payments.
+- **Label financial outputs as estimates.** A model score is not proof an intervention prevented an RTO. Dashboard assumptions are explicit and editable.
+- **Surface data-quality issues.** There are 60 rows involved in duplicate order IDs (30 duplicated ID values), 12 missing pincodes, 4 missing cities, and inconsistent status strings. These should be resolved with the data owner before retraining.

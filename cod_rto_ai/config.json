@@ -1,0 +1,10 @@
+{
+  "ship_max": 0.18,
+  "confirm_max": 0.35,
+  "nudge_max": 0.55,
+  "prepaid_discount_pct": 3,
+  "prepaid_discount_cap": 30,
+  "confirmation_timeout_hours": 24,
+  "auto_cancel_enabled": false,
+  "high_risk_pincode_block": false
+}
